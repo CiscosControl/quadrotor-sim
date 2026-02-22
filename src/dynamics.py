@@ -1,5 +1,8 @@
 import numpy as np
 import quaternion # here is function R
+from paramaters import QuadParams
+
+param = QuadParams() # inertia, mass and gravity of quadrotor
 
 ##states: position, velocity, quaternin, angular velocity
 
@@ -44,4 +47,3 @@ def dynamics(t,x, u, w, param):
 
     return x_dot
 
-    
