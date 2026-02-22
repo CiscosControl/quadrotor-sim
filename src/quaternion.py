@@ -30,3 +30,52 @@ def quat_normalize(q: jnp.ndarray, eps: float = 1e-12) -> jnp.ndarray:
     n = jnp.linalg.norm(q)
     n = jnp.maximum(n, eps)
     return q / n
+
+
+def rotation_matrix(phi, theta, psi):
+    """
+    ZYX Rotation Matrix (Body -> Inertial)
+    """
+
+    ctheta = np.cos(theta)
+    cphi   = np.cos(phi)
+    cpsi   = np.cos(psi)
+
+    stheta = np.sin(theta)
+    sphi   = np.sin(phi)
+    spsi   = np.sin(psi)
+
+    R = np.array([
+        [ctheta*cpsi,
+         ctheta*spsi,
+         -stheta],
+
+        [sphi*stheta*cpsi - cphi*spsi,
+         sphi*stheta*spsi + cphi*cpsi,
+         sphi*ctheta],
+
+        [cphi*stheta*cpsi + sphi*spsi,
+         cphi*stheta*spsi - sphi*cpsi,
+         cphi*ctheta]
+    ])
+
+    return R
+
+def euler_rate_matrix(phi, theta):
+    """
+    Returns T(phi, theta) matrix such that:
+    euler_dot = T @ omega
+    """
+
+    sphi = np.sin(phi)
+    cphi = np.cos(phi)
+    ttheta = np.tan(theta)
+    ctheta = np.cos(theta)
+
+    T = np.array([
+        [1, sphi*ttheta, cphi*ttheta],
+        [0, cphi, -sphi],
+        [0, sphi/ctheta, cphi/ctheta]
+    ])
+
+    return T
