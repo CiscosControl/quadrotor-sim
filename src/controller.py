@@ -13,7 +13,7 @@ def lqr(Q,R):
     A,B = linear_matrices(param)
 
     P = solve_continuous_are(A,B,Q,R)
-
+    
     K = np.linalg.inv(R) @ B.T @ P
 
 
