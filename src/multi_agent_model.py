@@ -1,5 +1,6 @@
 from linear_model import linear_matrices
-from paramaters import linear_matrices
+from paramaters import QuadParams
+import numpy as np
 
 def system_model(A,B):
     """

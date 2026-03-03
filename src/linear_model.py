@@ -1,11 +1,11 @@
 import numpy as np
 def linear_matrices(params):
-    m = param.m
-    g = param.g
+    m = params.m
+    g = params.g
 
-    Jx = param.J[0,0]
-    Jy = param.J[1,1]
-    Jz = param.J[2,2]
+    Jx = params.J[0,0]
+    Jy = params.J[1,1]
+    Jz = params.J[2,2]
 
     A = np.zeros((12,12))
     B = np.zeros((12,4))
