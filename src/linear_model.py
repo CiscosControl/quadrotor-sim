@@ -1,3 +1,5 @@
+# linear_model.py
+
 import numpy as np
 def linear_matrices(params):
     m = params.m

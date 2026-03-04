@@ -1,4 +1,5 @@
 # quaternion.py
+
 import jax.numpy as jnp
 
 def quat_conj(q: jnp.ndarray) -> jnp.ndarray:

@@ -1,3 +1,5 @@
+# multi_agent_model.py
+
 from linear_model import linear_matrices
 from paramaters import QuadParams
 import numpy as np

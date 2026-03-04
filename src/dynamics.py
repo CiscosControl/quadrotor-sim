@@ -1,3 +1,5 @@
+#dynamics.py
+
 import numpy as np
 import quaternion # here is function R
 from paramaters import QuadParams
