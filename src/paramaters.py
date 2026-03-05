@@ -1,4 +1,4 @@
-# parameters.py
+# param
 
 import numpy as np
 
