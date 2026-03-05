@@ -1,107 +1,93 @@
-# simulation.py
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 
 from paramaters import QuadParams
 from linear_model import linear_matrices
-from multi_agent_model import system_model
-from controller import lqr_coupled_gain
+from controller import lqr_single
 
 
 delta = 1.0
-t_span = (0,10)
-t_eval = np.linspace(0,10,1000)
+t_span = (0, 10)
+t_eval = np.linspace(0, 10, 1000)
 
-def reference(t,delta):
-    Xr = np.zeros(24)
 
+def leader_reference(t):
     r = 5
     omega = 0.5
 
-    xc = r * np.cos(omega*t)
-    yc = r * np.sin(omega*t)
+    Xr = np.zeros(12)
+    Xr[0] = r * np.cos(omega * t)
+    Xr[1] = r * np.sin(omega * t)
 
-    Xr[0] = xc + delta/2
-    Xr[1] = yc + delta/2
-
-    Xr[12] = xc - delta/2
-    Xr[13] = yc - delta/2
-
-    return Xr 
+    return Xr
 
 
+def closed_loop(t, X, A, B, K_leader, K_follower):
 
-def closed_loop_dynamics(t,X, M, Z, K):
+    # Split states
+    x1 = X[0:12]      # leader
+    x2 = X[12:24]     # follower
 
-    Xr = reference(t,delta)
-    return (M - Z @ K) @ X +(Z@K)@Xr
+    # ----- Leader control -----
+    xr1 = leader_reference(t)
+    u1 = -K_leader @ (x1 - xr1)
 
+    # ----- Follower control -----
+    # Desired relative offset
+    desired_offset = np.zeros(12)
+    desired_offset[0] = -delta  # follower stays delta behind in x
+
+    xr2 = x1 + desired_offset
+    u2 = -K_follower @ (x2 - xr2)
+
+    # Dynamics
+    x1_dot = A @ x1 + B @ u1
+    x2_dot = A @ x2 + B @ u2
+
+    return np.concatenate([x1_dot, x2_dot])
+
+
+# Build system
 param = QuadParams()
 A, B = linear_matrices(param)
-M, Z = system_model(A,B)
 
+# LQR gains (same A,B but separate controllers)
+K_leader = lqr_single(A, B)
+K_follower = lqr_single(A, B)
 
-K = lqr_coupled_gain(M,Z,delta)
-
-##Inintial conditionsc
+# Initial conditions
 X0 = np.zeros(24)
 
-# Give drone 1 position offset
-X0[0] = 15.0 #x1
-X0[1] = 1.0 #y1
+X0[0] = 15.0
+X0[1] = 1.0
 
-X0[12] = 15 #x2
-X0[13] = 1.5 #y2
+X0[12] = 10.0
+X0[13] = 1.5
 
 
 sol = solve_ivp(
-    closed_loop_dynamics,
+    closed_loop,
     t_span,
     X0,
     t_eval=t_eval,
-    args=(M, Z, K)
+    args=(A, B, K_leader, K_follower)
 )
-# Solution of drone propagation
+
+# Extract positions
 x1 = sol.y[0,:]
 y1 = sol.y[1,:]
 
 x2 = sol.y[12,:]
 y2 = sol.y[13,:]
 
-#
-x1_ref = []
-y1_ref = []
-
-x2_ref = []
-y2_ref = []
-
-for t in t_eval:
-    Xr =  reference(t,delta)
-    x1_ref.append(Xr[0])
-    y1_ref.append(Xr[1])
-    x2_ref.append(Xr[12])
-    y2_ref.append(Xr[13])
-
-
-
-### Plots ###
-
-#plot Drone trajectory
-plt.plot(x1, y1, label="Drone 1")
-plt.plot(x2, y2, label="Drone 2")
-
-# plot reference positions as markers
-plt.plot(x1_ref, y1_ref, 'r--', label = "Drone 1 Ref")
-plt.plot(x2_ref, y2_ref, 'b--', label ="Drone 2 Ref")
-
+# Plot
+plt.plot(x1, y1, label="Leader")
+plt.plot(x2, y2, label="Follower")
 
 plt.legend()
 plt.xlabel("x")
 plt.ylabel("y")
-plt.title("closed-loop trajectories")
-
+plt.title("Leader–Follower LQR")
 plt.grid()
 plt.show()
-
-
