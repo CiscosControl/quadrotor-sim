@@ -13,12 +13,10 @@ t_eval = np.linspace(0, 10, 1000)
 
 
 def leader_reference(t):
-    r = 5
-    omega = 0.5
-
     Xr = np.zeros(12)
-    Xr[0] = r * np.cos(omega * t)
-    Xr[1] = r * np.sin(omega * t)
+
+    Xr[0] = t
+    Xr[1] = t
 
     return Xr
 
@@ -81,13 +79,32 @@ y1 = sol.y[1,:]
 x2 = sol.y[12,:]
 y2 = sol.y[13,:]
 
+
+
+
 # Plot
+# ----- Compute reference trajectory for plotting -----
+x_ref = []
+y_ref = []
+
+for t in t_eval:
+    Xr = leader_reference(t)
+    x_ref.append(Xr[0])
+    y_ref.append(Xr[1])
+
+x_ref = np.array(x_ref)
+y_ref = np.array(y_ref)
+
+
+# ----- Plot -----
 plt.plot(x1, y1, label="Leader")
 plt.plot(x2, y2, label="Follower")
+plt.plot(x_ref, y_ref, 'r--', linewidth=2, label="Leader Reference")
 
 plt.legend()
 plt.xlabel("x")
 plt.ylabel("y")
 plt.title("Leader–Follower LQR")
 plt.grid()
+plt.axis("equal")  # keeps circle shape correct
 plt.show()
