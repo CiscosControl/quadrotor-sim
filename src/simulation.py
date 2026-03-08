@@ -51,7 +51,7 @@ param = QuadParams()
 A, B = linear_matrices(param)
 
 # LQR gains (same A,B but separate controllers)
-K_leader = lqr_single(A, B)
+K_leader = lqr_(A, B)
 K_follower = lqr_single(A, B)
 
 # Initial conditions
