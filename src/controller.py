@@ -16,12 +16,12 @@ def lqr_leader(A, B, Q=None, R=None):
         Q = np.eye(n)
 
         # Stronger penalty on position states
-        Q[0,0] = 500
-        Q[1,1] = 500
-        Q[2,2] = 500
+        Q[0,0] = 100
+        Q[1,1] = 100
+        Q[2,2] = 100
 
     if R is None:
-        R = np.eye(m) 
+        R = 0.01*np.eye(m)
 
     # Solve Riccati equation
     P = solve_continuous_are(A, B, Q, R)
@@ -43,12 +43,12 @@ def lqr_follower(A, B, Q=None, R=None):
         Q = np.eye(n)
 
         # Stronger penalty on position states
-        Q[0,0] = 50
-        Q[1,1] = 50
-        Q[2,2] = 50
+        Q[0,0] = 500
+        Q[1,1] = 500
+        Q[2,2] = 500
 
     if R is None:
-        R = np.eye(m)
+        R = 0.01*np.eye(m)
 
     # Solve Riccati equation
     P = solve_continuous_are(A, B, Q, R)
