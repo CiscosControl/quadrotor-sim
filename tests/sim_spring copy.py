@@ -76,28 +76,33 @@ def closed_loop_3drones(t, X, A, B, K_leader, K_f1, K_f2, B_pinv):
     xr1, xr1_dot = leader_reference(t)    
     
     # Feedback (ufb): Acts like a spring pulling to the reference
-    u_fb = -K_leader @ (x1 - xr1)
+    e_rel = x1 - xr1
+
+    e_rel[0:2] -= f_rep1
+    u_fb = -K_leader @ e_rel
     
     # Feed-forward (uff): Anticipates the curve to eliminate lag
     # Mathematical derivation: uff = B_pinv @ (xr_dot - A @ xr)
     u_ff = B_pinv @ (xr1_dot - A @ xr1)
     
     u1 = u_fb + u_ff
-    u1[0:2] += f_rep1
+    ##u1[0:2] += f_rep1
 
     # ---- Follower 1: 2m behind leader ----
     d1 = np.zeros(12)
     d1[0] = -2.0  # Stay 2m behind the leader's x-position
     e_rel1 = (x2 - x1) - d1 
+    e_rel1[0:2] -= f_rep2
     u2 = -K_f1 @ e_rel1
-    u2[0:2] += f_rep2
+    #u2[0:2] += f_rep2
 
     # ---- Follower 2: 4m behind leader ----
     d2 = np.zeros(12)
     d2[0] = 2.0  # Stay 4m behind leader (2m behind F1)
     e_rel2 = (x3 - x1) - d2
+    e_rel2[0:2] -= f_rep3
     u3 = -K_f2 @ e_rel2
-    u3[0:2] += f_rep3
+    #u3[0:2] += f_rep3
 
     # Calculate Disturbance
     dist1 = get_disturbance(t)
@@ -231,13 +236,12 @@ def animate(i):
     return dot_l, dot_f1, dot_f2, line_l, line_f1, line_f2, spring_l_f1, spring_l_f2
 
 ani = animation.FuncAnimation(fig, animate, frames=len(t_eval), interval=20, blit=True)
-plt.show()
 
 def plot_drone_states(sol, t_eval):
     # state_labels for a 12-state quadrotor
     # Convert angular states (angles and rates) to degrees/deg/s for plotting
-    labels = ['X (m)', 'Y (m)', 'Z (m)', 'Roll (deg)', 'Pitch (deg)', 'Yaw (deg)','Vx (m/s)', 'Vy (m/s)', 'Vz (m/s)',
-               'omega_x (deg/s)', 'omega_y (deg/s)', 'omega_z (deg/s)'] 
+    labels = ['X (m)', 'Y (m)', 'Z (m)', 'Vx (m/s)', 'Vy (m/s)', 'Vz (m/s)',
+              'Roll (deg)', 'Pitch (deg)', 'Yaw (deg)', 'omega_x (deg/s)', 'omega_y (deg/s)', 'omega_z (deg/s)']
     drones = ['Leader', 'Follower 1', 'Follower 2']
     colors = ['b', 'g', 'm']
     
@@ -296,3 +300,4 @@ fps = 50
 ani.save('drone_formation.gif', writer='pillow', fps=fps)
 
 print("Save complete!")
+plt.show()

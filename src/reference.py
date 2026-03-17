@@ -8,7 +8,7 @@ def leader_reference(t):
     Xr_dot = np.zeros(12)
     
     # Parameters for a complex "Figure-Eight"
-    A_x, A_y, omega = 10.0, 5.0, 0.2
+    A_x, A_y, omega = 10.0, 5.0, 0.07
     
     # Position (xr) - The "Spring" anchor point
     Xr[0] = A_x * np.sin(omega * t)      # x

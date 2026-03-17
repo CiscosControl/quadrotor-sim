@@ -16,12 +16,12 @@ def lqr_leader(A, B, Q=None, R=None):
         Q = np.eye(n)
 
         # Stronger penalty on position states
-        Q[0,0] = 100
-        Q[1,1] = 100
-        Q[2,2] = 100
+        Q[0,0] = 50
+        Q[1,1] = 50
+        Q[2,2] = 50
 
     if R is None:
-        R = 0.01*np.eye(m)
+        R = np.eye(m)
 
     # Solve Riccati equation
     P = solve_continuous_are(A, B, Q, R)
@@ -40,15 +40,15 @@ def lqr_follower(A, B, Q=None, R=None):
     m = B.shape[1]
 
     if Q is None:
-        Q = np.eye(n)
+        Q = np.eye(n)* 10.0
 
         # Stronger penalty on position states
-        Q[0,0] = 500
-        Q[1,1] = 500
-        Q[2,2] = 500
-
+        Q[0,0] = Q[1,1] = Q[2,2] = 40.0  # High position penalty
+        Q[3,3] = Q[4,4] = Q[5,5] = 60.0
+        Q[6,6] = Q[7,7] = Q[8,8] = 30.0   # ADD THIS: Velocity damping!
+        Q[9,9] = 100.0 
     if R is None:
-        R = 0.01*np.eye(m)
+        R = np.eye(m)*10.0
 
     # Solve Riccati equation
     P = solve_continuous_are(A, B, Q, R)
